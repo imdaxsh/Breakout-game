@@ -7,20 +7,87 @@ const livesElement = document.getElementById('lives');
 // Game state
 let score = 0;
 let lives = 4;
-let gameRunning = true;
+let gameRunning = false;
+let gamePaused = false;
 
-// Paddle
+// Game objects
 const paddleWidth = 100;
 const paddleHeight = 15;
 const paddleSpeed = 8;
 let paddleX = (canvas.width - paddleWidth) / 2;
 
-// Ball
 const ballRadius = 10;
 let ballX = canvas.width / 2;
 let ballY = canvas.height - 30;
 let ballSpeedX = 5;
 let ballSpeedY = -5;
+
+// Menu elements
+const menu = document.getElementById('menu');
+const startBtn = document.getElementById('startBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+const exitBtn = document.getElementById('exitBtn');
+
+// Menu event listeners
+startBtn.addEventListener('click', startGame);
+resumeBtn.addEventListener('click', resumeGame);
+exitBtn.addEventListener('click', exitGame);
+
+// Show menu initially
+showStartMenu();
+
+function showStartMenu() {
+    menu.style.display = 'flex';
+    startBtn.style.display = 'block';
+    resumeBtn.style.display = 'none';
+    exitBtn.style.display = 'none';
+    gameRunning = false;
+}
+
+function showPauseMenu() {
+    menu.style.display = 'flex';
+    startBtn.style.display = 'none';
+    resumeBtn.style.display = 'block';
+    exitBtn.style.display = 'block';
+    gameRunning = false;
+}
+
+function hideMenu() {
+    menu.style.display = 'none';
+    gameRunning = true;
+}
+
+function resumeGame() {
+    hideMenu();
+    gamePaused = false;
+    draw();
+}
+
+function startGame() {
+    // Set canvas dimensions
+    canvas.width = 800;
+    canvas.height = 600;
+    
+    hideMenu();
+    resetGame();
+    draw();
+}
+
+function exitGame() {
+    window.location.href = '/';
+}
+
+function resetGame() {
+    score = 0;
+    lives = 4;
+    scoreElement.textContent = score;
+    livesElement.textContent = lives;
+    ballX = canvas.width / 2;
+    ballY = canvas.height - 30;
+    ballSpeedX = 5;
+    ballSpeedY = -5;
+    paddleX = (canvas.width - paddleWidth) / 2;
+}
 
 // Bricks
 const brickRowCount = 5;
@@ -42,7 +109,6 @@ for (let c = 0; c < brickColumnCount; c++) {
 // Input
 let rightPressed = false;
 let leftPressed = false;
-let gamePaused = false;
 
 // Event listeners
 document.addEventListener('keydown', keyDownHandler);
@@ -54,9 +120,14 @@ function keyDownHandler(e) {
     } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
         leftPressed = true;
     } else if (e.key === ' ' || e.key === 'Spacebar') {
-        gamePaused = !gamePaused;
-        if (!gamePaused) {
-            draw();
+        if (gameRunning) {
+            gamePaused = !gamePaused;
+            if (gamePaused) {
+                showPauseMenu();
+            } else {
+                hideMenu();
+                draw();
+            }
         }
     }
 }
@@ -199,5 +270,5 @@ function drawPauseText() {
     }
 }
 
-// Initialize game
-draw();
+// Initialize game state
+resetGame();
